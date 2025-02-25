@@ -160,9 +160,9 @@ The `co_await` operator can be used on any object that satisfies the following c
 
 The `await_ready` function is used as a shortcut, so that we can quickly determine if the coroutine needs to be suspended or not. If we return `true` here, the coroutine will not be suspended, and the `await_resume` function will be called immediately in order to obtain the value of the `co_await` expression. If we return `false`, the `await_suspend` function will instead be called, and this is where the fun begins.
 
-The `await_suspend` function is used to suspend a coroutine. here we are given a `std::coroutine_handle`, which acts as a glorified function pointer, and which can be invoked *in order to resume the coroutine*. Basically, it's our responsibility to save this handle, and invoke it whenever we want to resume execution.
+The `await_suspend` function is used to suspend a coroutine. Here we are given a `std::coroutine_handle`, which acts as a glorified function pointer, and which can be invoked *in order to resume the coroutine*. Basically, it's our responsibility to save this handle, and invoke it whenever we want to resume execution.
 
-This is the cool thing with coroutines, in that they do not impose any kind of scheduling. We could spin up a thread here, do something heavy, and once we are done, we invoke the handle to resume the coroutine. We could also subscribe to a signal for an operation that is queued in an event loop, and invoke the handle once signalled.
+This is the cool thing with coroutines, in that they do not impose any kind of scheduling. We could spin up a thread here, do something heavy, and once we are done, we invoke the handle to resume the coroutine. We could also subscribe to a signal for an operation that is queued in an event loop, and invoke the handle once signaled.
 
 For this little experiment however, we're gonna do something way crazier.
 
