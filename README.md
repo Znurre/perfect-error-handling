@@ -53,6 +53,7 @@ std::expected<std::string, uint64_t> read_from_file(std::string_view file_name)
 	return target;
 }
 ```
+In a real life scenario, we would of course use RAII for the file handle, but that's beyond the point of this exercise, so let's excuse this small leak for now.
 
 As you can see, we have a boolean operator for `std::unexpected` which can be used to check for an error. If the object contains an error, we do an early return, propagating the error by using `std::unexpected(...)` again, as we need to wrap it in an `std::expected<string, uint64_t>` this time around.
 
