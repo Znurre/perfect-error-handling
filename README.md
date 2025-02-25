@@ -282,7 +282,7 @@ In order to make the design as simple as possible, I decided to use a `std::shar
 
 This way the promise can simply assign the value in the `return_value` method, and it will immediately be reflected in any `result<T>` objects created from this promise.
 
-Another thing worth nothing is the implementation of `await_suspend`. Here you can see how we are checking if the `std::expected` stored in our shared pointer contains an error, and if so, we do 3 things:
+Another thing worth noting is the implementation of `await_suspend`. Here you can see how we are checking if the `std::expected` stored in our shared pointer contains an error, and if so, we do 3 things:
 
 * The promise object for the suspension point is obtained, and we assign the `std::unexpected` error value using the same `return_value` method that the compiler would use. By doing this we make sure that the error is propagated to the promise of the parent coroutine.
 * The coroutine is destroyed. This deallocates any storage and deinitializes any automatic storage duration objects up until this suspension point.
