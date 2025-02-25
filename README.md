@@ -272,7 +272,7 @@ private:
 };
 ```
 
-I am not gonna explain everything here, as all of it can be looked up at cppreference, but some things are worth nothing. For example, the coupling between the `promise<T>` type and `result<T>` might seem a bit unclear.
+I am not gonna explain everything here, as all of it can be looked up at cppreference, but some things are worth noting. For example, the coupling between the `promise<T>` type and `result<T>` might seem a bit unclear.
 
 The way it works, is that we'll have our functions return the `result<T>` type. When the compiler sees that we are using the coroutine operators (`co_return`), it will automatically resolve the promise type based on the `promise_type` type alias of `result<T>`, and use that for our coroutine.
 
