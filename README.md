@@ -155,19 +155,19 @@ So, how does this help us? Before I can answer that, we need to take a look at t
 
 The `co_await` operator can be used on any object that satisfies the following conditions:
 
-* Has an `await_resume` function
-* Has an `await_suspend` function
-* Has an `await_ready` function
+* Has an `await_resume` method
+* Has an `await_suspend` method
+* Has an `await_ready` method
 
-The `await_ready` function is used as a shortcut, so that we can quickly determine if the coroutine needs to be suspended or not. If we return `true` here, the coroutine will not be suspended, and the `await_resume` function will be called immediately in order to obtain the value of the `co_await` expression. If we return `false`, the `await_suspend` function will instead be called, and this is where the fun begins.
+The `await_ready` method is used as a shortcut, so that we can quickly determine if the coroutine needs to be suspended or not. If we return `true` here, the coroutine will not be suspended, and the `await_resume` method will be called immediately in order to obtain the value of the `co_await` expression. If we return `false`, the `await_suspend` method will instead be called, and this is where the fun begins.
 
-The `await_suspend` function is used to suspend a coroutine. Here we are given a `std::coroutine_handle`, which acts as a glorified function pointer, and which can be invoked *in order to resume the coroutine*. Basically, it's our responsibility to save this handle, and invoke it whenever we want to resume execution.
+The `await_suspend` method is used to suspend a coroutine. Here we are given a `std::coroutine_handle`, which acts as a glorified function pointer, and which can be invoked *in order to resume the coroutine*. Basically, it's our responsibility to save this handle, and invoke it whenever we want to resume execution.
 
 This is the cool thing with coroutines, in that they do not impose any kind of scheduling. We could spin up a thread here, do something heavy, and once we are done, we invoke the handle to resume the coroutine. We could also subscribe to a signal for an operation that is queued in an event loop, and invoke the handle once signaled.
 
 For this little experiment however, we're gonna do something way crazier.
 
-The `std::coroutine_handle` does not only allow us to resume the coroutine. It actually also allows us to "destroy" it. Not only this - remember how the `await_ready` function could be used as a shortcut to prevent suspension? `await_suspend` actually also allows us to do the same thing, or at least resume the coroutine immediately, as it's actually suspended at this point. By returning `false` from this function, the coroutine will be immediately resumed, and `await_ready` will be called in order to obtain the value of the `co_await` expression. If we instead return `true`, we return control to the caller.
+The `std::coroutine_handle` does not only allow us to resume the coroutine. It actually also allows us to "destroy" it. Not only this - remember how the `await_ready` method could be used as a shortcut to prevent suspension? `await_suspend` actually also allows us to do the same thing, or at least resume the coroutine immediately, as it's actually suspended at this point. By returning `false` from this method, the coroutine will be immediately resumed, and `await_ready` will be called in order to obtain the value of the `co_await` expression. If we instead return `true`, we return control to the caller.
 
 This allows us to do something devious. We could create an implementation which checks an `std::expected` value for error, and conditionally resumes or suspends the coroutine. If we suspend the coroutine, returning to the caller, we will also make use of the feature to destroy a coroutine to make sure that *all automatic storage duration objects* allocated up until this suspension point, are properly deallocated and deinitialized!
 
@@ -280,7 +280,7 @@ When the coroutine function is entered, our promise will be instantiated, the pr
 
 In order to make the design as simple as possible, I decided to use a `std::shared_ptr` for the storage. This allows both the promise and any result objects to have a reference to the same data, while still making sure that there can be no dangling references if either of them go out of scope (which will happen).
 
-This way the promise can simply assign the value in the `return_value` function, and it will immediately be reflected in any `result<T>` objects created from this promise.
+This way the promise can simply assign the value in the `return_value` method, and it will immediately be reflected in any `result<T>` objects created from this promise.
 
 Another thing worth nothing is the implementation of `await_suspend`. Here you can see how we are checking if the `std::expected` stored in our shared pointer contains an error, and if so, we do 3 things:
 
